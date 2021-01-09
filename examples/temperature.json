@@ -1,0 +1,6 @@
+{
+  "variables": ["temperature", "heat", "brightness"],
+  "modifiers": ["increases", "decreases", "remains the same"],
+  "qualifiers": ["in point A", "in point B", "of the object"],
+  "interactors": ["is greater than", "is smaller than", "is equal to"]
+}
