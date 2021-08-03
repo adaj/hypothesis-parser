@@ -1,3 +1,15 @@
+"""
+Script for evaluating simple hypotheses given a domain file (see `examples/`).
+
+
+How to use:
+`$ python hypothesis_parser.py --hypothesis="if temperature increases then brightness increases" --domain_file=examples/temperature.json`
+
+Contributors:
+
+* Adelson de Araujo (a.dearaujo@utwente.nl)
+"""
+
 import re
 import json
 import numpy as np
@@ -20,57 +32,6 @@ def preprocess(text: str, language: str = 'en',
 
 
 # Actions
-
-def generate_actions(variables: list, modifers: list,
-                     interactors: list, qualifiers: list) -> list:
-    """Generates a list of possible action structured with keys given input combination.
-            Possible structures:
-                1. Action = Variable + Qualifier + Modifier
-                2. Action = Modifier + Variable + Qualifier
-                3. Action = Variable + Qualifier + Interactor + Value
-                4. Action = Variable + Qualifier + Interactor + Variable + Qualifier
-                4. Action = Variable + Qualifier + Interactor + Qualifier
-                    (assuming second qualifier refers to the first variable)
-                5. Action = Action and Action
-                    (recursion is allowed)
-    """
-    actions = []
-    for vi in variables:
-        for qi in qualifiers:
-            for mi in modifiers:
-                # actions type 1
-                actions.append({'variable': vi, 'qualifier': qi, 'modifier': mi})
-                # actions type 2
-                actions.append({'modifier': mi, 'variable': vi, 'qualifier': qi})
-            for ii in interactors:
-                # actions type 3
-                actions.append({'variable': vi, 'qualifier': qi, 'interactor': ii,
-                                'value':np.random.randint(100)})
-                while True:
-                    qj = np.random.choice(qualifiers)
-                    if qj != qi:
-                        break
-                # actions type 4
-                actions.append({'variable': vi, 'qualifier': qi, 'interactor': ii,
-                                'variable_': vi, 'qualifier_': qj})
-                # actions type 4
-                actions.append({'variable': vi, 'qualifier': qi, 'interactor': ii,
-                                'qualifier_': qj})
-    composed_actions = []
-    for i in range(len(actions)):
-        # sample two actions of different variables (including those generated in this loop)
-        while True:
-            ai, aj = np.random.choice(actions, 2, replace=False)
-            if ai['variable'] != aj['variable']:
-                break
-        # add numerical label to subsequent keys to avoid overriding ai's keys
-        c = np.sum([1 if 'and' in k else 0 for k in {**ai, **aj}]) + 1
-        aj = {f'{k}{c}':aj[k] for k in aj}
-        # actions type 5
-        composed_actions.append({**ai, 'and':'and', **aj})
-    actions += composed_actions
-    return actions
-
 
 class Action:
     """Wrapper to operate individual actions and their respective tokens."""
@@ -193,11 +154,13 @@ class Hypothesis:
                 self.label = 5
             else:
                 self.label = 0
-            self.forms = [
-                {"text":f"if {action_x.text} then {action_y.text}",
+            self.forms = {
+                'direct': {"text":f"if {action_x.text} then {action_y.text}",
                      "syntax": f"if {action_x.syntax} then {action_y.syntax}"},
-                {"text":f"{action_y.text} if {action_x.text}",
-                     "syntax": f"{action_y.syntax} if {action_x.syntax}"}]
+                'inverse': {"text":f"{action_y.text} if {action_x.text}",
+                     "syntax": f"{action_y.syntax} if {action_x.syntax}"}
+            }
+
 
 
 
