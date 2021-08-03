@@ -2,7 +2,7 @@
 
 This repository has two basic functions. First, it can generate artificial
 hypotheses given a domain file, and second, estimate its quality
-following the advice provided in (Kroeze et al., 2018). This domain file
+following the advice provided in [(Kroeze et al., 2018)](https://www.frontiersin.org/articles/10.3389/feduc.2018.00116/full). This domain file
 should be defined in the format of a grammar, with a defined set of elements.
 
 To see how the grammar/domain file looks like, take a look in the `examples/`
